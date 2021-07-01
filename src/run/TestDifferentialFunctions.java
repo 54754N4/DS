@@ -1,6 +1,7 @@
 package run;
 
 import ads.diff.common.MultivariateExpression;
+import ui.components.TreeFrame;
 import ads.diff.ast.parser.ExpressionParser;
 import ads.diff.common.ExpressionProvider;
 
@@ -8,10 +9,9 @@ import ads.diff.common.ExpressionProvider;
 public class TestDifferentialFunctions {
 	public static void main(String[] args) throws Exception {
 //		testFunctions();
-		testParser();
-		testDifferentiation();
-		MultivariateExpression result = ExpressionParser.parse("6*x/12");
-		System.out.printf("f(x)     = %s%n", result);
+//		testParser();
+//		testDifferentiation();
+		testExpressionTree();
 	}
 
 	private static void testFunctions() {
@@ -48,5 +48,27 @@ public class TestDifferentialFunctions {
 		System.out.printf("f''(x)   = %s%n", result.derivative("x").derivative("x"));
 		System.out.printf("f'''(x)  = %s%n", result.derivative("x").derivative("x").derivative("x"));
 		System.out.printf("f''''(x) = %s%n", result.derivative("x").derivative("x").derivative("x").derivative("x"));
+	}
+	
+	private static void testExpressionTree() throws Exception {
+//		MultivariateExpression result = ExpressionParser.parse("6*x/12");
+//		System.out.printf("f(x)     = %s%n", result);
+		TreeFrame.display(
+				ExpressionParser.parse("(cos(x))+2*x"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"),
+				ExpressionParser.parse("6*x/12"));
 	}
 }
