@@ -32,11 +32,41 @@ public class TensorFactory {
 		return this;
 	}
 	
-	/* Factory methods */
+	/* Layout dependent creation methods */
 	
 	public Tensor create(int[] shape, double...data) {
+		return of(layout, shape, data);
+	}
+	
+	public Tensor rowMajor(int... shape) {
+		return of(MemoryLayout.ROW_MAJOR, shape);
+	}
+	
+	public Tensor rowMajor(int[] shape, double... data) {
+		return of(MemoryLayout.ROW_MAJOR, shape, data);
+	}
+	
+	public Tensor colMajor(int... shape) {
+		return of(MemoryLayout.COL_MAJOR, shape);
+	}
+	
+	public Tensor colMajor(int[] shape, double... data) {
+		return of(MemoryLayout.COL_MAJOR, shape, data);
+	}
+	
+	public Tensor sparse(int... shape) {
+		return of(MemoryLayout.SPARSE, shape);
+	}
+	
+	public Tensor sparse(int[] shape, double... data) {
+		return of(MemoryLayout.SPARSE, shape, data);
+	}
+	
+	public Tensor of(MemoryLayout layout, int[] shape, double...data) {
 		return layout.tensorConstructor().apply(shape, data);
 	}
+	
+	/* Factory methods */
 	
 	public Tensor identity(int...shape) {
 		return create(shape)

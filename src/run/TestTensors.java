@@ -212,8 +212,8 @@ public class TestTensors {
 	
 	public static void testCoords() {
 		int[] shape = new int[]{10,10,10,10}, coordsCM, coordsRM;
-		Tensor tcm = Tensors.of(MemoryLayout.COL_MAJOR, shape),
-				trm = Tensors.of(MemoryLayout.ROW_MAJOR, shape);
+		Tensor tcm = Tensors.pack(MemoryLayout.COL_MAJOR, shape),
+				trm = Tensors.pack(MemoryLayout.ROW_MAJOR, shape);
 		Iterator<int[]> iteratorCM = tcm.coordinates(),
 				iteratorRM = trm.coordinates();
 		System.out.printf("Strides=%s%n", Arrays.toString(tcm.stride()));
