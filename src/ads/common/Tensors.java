@@ -2,7 +2,7 @@ package ads.common;
 
 import ads.contracts.Tensor;
 import ads.tensors.MemoryLayout;
-import ads.tensors.TensorBuilder;
+import ads.tensors.TensorFactory;
 
 /**
  * 
@@ -40,7 +40,7 @@ public interface Tensors {
 		return of(MemoryLayout.SPARSE, shape, data);
 	}
 	
-	static TensorBuilder builder() {
-		return new TensorBuilder();
+	static TensorFactory factory() {
+		return TensorFactory.getInstance();
 	}
 }

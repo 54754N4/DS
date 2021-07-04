@@ -41,12 +41,19 @@ public abstract class LinearTensor extends AbstractTensor {
 	
 	/* Transformation methods */
 	
+	@Override
 	public Tensor elementWiseTransformi(Function<Double, Double> map) {
 		for (int i=0; i<count(); i++)
 			memory[i] = map.apply(memory[i]);
 		return this;
 	}
 	
+	@Override
+	public Tensor elementWiseIndexedTransformi(BiFunction<int[], Double, Double> map) {
+		return forEachIndexed((coords, val) -> memory[offset(coords)] = map.apply(coords, val));
+	}
+	
+	@Override
 	public Tensor elementWiseBiTransformi(BiFunction<Double, Double, Double> map, Tensor t) {
 		if (!sameDimensions(this, t))
 			throw new DifferentDimensionTensorsException();
@@ -54,6 +61,13 @@ public abstract class LinearTensor extends AbstractTensor {
 		for (int i=0; i<count(); i++)
 			memory[i] = map.apply(current[i], other[i]);
 		return this;
+	}
+	
+	@Override
+	public Tensor elementWiseIndexedBiTransformi(TriFunction<int[], Double, Double, Double> map, Tensor t) {
+		if (!sameDimensions(this, t))
+			throw new DifferentDimensionTensorsException();
+		return forEachIndexed((coords, val) -> memory[offset(coords)] = map.apply(coords, val, t.get(coords)));
 	}
 	
 	/* Object overridden methods */

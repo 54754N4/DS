@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -18,6 +19,12 @@ public abstract class AbstractTensor implements Tensor {
 	private int count, rank;
 	private int[] shape, stride;
 	private final MemoryLayout layout;
+	
+	public static void main(String[] args) {
+		System.out.println(Tensor.broadcastingCompatible(new int[] {1,2,3}, new int[] {3,3}));
+		System.out.println(Arrays.toString(Tensor.broadcastedShape(new int[] {1,3}, new int[] {})));
+
+	}
 	
 	public AbstractTensor(MemoryLayout layout, int[] shape) {
 		this.layout = layout;
@@ -79,11 +86,6 @@ public abstract class AbstractTensor implements Tensor {
 		return rank == 1;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(Tensor.broadcastingCompatible(new int[] {1,2,3}, new int[] {3,3}));
-		System.out.println(Arrays.toString(Tensor.broadcastedShape(new int[] {1,3}, new int[] {})));
-	}
-	
 	/* Transformations */
 	
 	@Override
@@ -103,8 +105,18 @@ public abstract class AbstractTensor implements Tensor {
 	}
 	
 	@Override
+	public Tensor elementWiseIndexedTransform(BiFunction<int[], Double, Double> map) {
+		return copy().elementWiseIndexedTransformi(map);
+	}
+	
+	@Override
 	public Tensor elementWiseBiTransform(BiFunction<Double, Double, Double> map, Tensor t) {
 		return copy().elementWiseBiTransformi(map, t);
+	}
+	
+	@Override
+	public Tensor elementWiseIndexedBiTransform(TriFunction<int[], Double, Double, Double> map, Tensor t) {
+		return copy().elementWiseIndexedBiTransformi(map, t);
 	}
 	
 	/* Default implementations */
@@ -159,9 +171,8 @@ public abstract class AbstractTensor implements Tensor {
 		return elementWiseBiTransformi(Numbers.DIVIDE_DOUBLE, t);
 	}
 	
-	// TODO Check correctness of this (and kronecker, outer product, inner product, matrix mul, direct sum etc)
 	@Override
-	public Tensor product(final Tensor t) {
+	public Tensor outer(final Tensor t) {
 		int rank = rank(), 
 			trank = t.rank(), 
 			newRank = rank + trank;
@@ -181,29 +192,44 @@ public abstract class AbstractTensor implements Tensor {
 		});
 	}
 	
+	@Override
+	public Tensor mmul(final Tensor t) {
+		if (rank() != 2 || t.rank() != 2)
+			throw new IllegalStateException("Only works on matrices");
+		int[] a = shape(), b = t.shape();
+		if (a[1] != b[0])
+			throw new IllegalStateException("Matrices are not multipliable");
+		int m = a[0], p = b[1], n = a[1];
+		Tensor result = constructor(new int[] {m, p});
+		for (int i=0; i<m; i++) {
+			for (int j=0; j<p; j++) {
+				double sum = 0;
+				for (int k=0; k<n; k++)
+					sum += get(i,k) * t.get(k, j);
+				result.set(sum, i, j);
+			}
+		}
+		return result;
+	}
+	
+	@Override
+	public Tensor kronecker(final Tensor t) {
+		if (rank() != 2 || t.rank() != 2)
+			throw new IllegalArgumentException();
+		int[] a = shape(), b = t.shape();
+		int m = a[0], n = a[1],
+			p = b[0], q = b[1];
+		Tensor result = constructor(new int[] {m*p, n*q});
+		for (int i=0; i<m*p; i++)
+			for (int j=0; j<q*n; j++)
+				result.set(get(i/p, j/q) * t.get(i%p, j%q), i, j);
+		return result;
+	}
+	
 //	public Tensor directSum(final Tensor t) {
 //		
 //	}
 //	
-//	public Tensor outer(final Tensor t) {
-//		int rank = rank(),
-//			trank = t.rank(),
-//			newRank = rank + trank;
-//		int[] newShape = new int[newRank],
-//			shape = shape(), 
-//			tshape = t.shape();
-//		for (int i=0; i<newRank; i++)
-//			newShape[i] = i<rank ? shape[i] : tshape[i-rank];
-//		Tensor result = constructor(newShape);
-//		return result.forEachDimension(Bag.of(this, t), 
-//				(resultCoords, axis, count, lastElementInBlock, bag) -> {
-//			Tensor u = bag.get(0),
-//				v = bag.get(1);
-//			int[] ucoords = Numbers.sublist(0, u.rank(), resultCoords),
-//					vcoords = Numbers.sublist(u.rank(), resultCoords.length, resultCoords);
-//			result.set(u.get(ucoords) * v.get(vcoords), resultCoords);
-//		});
-//	}
 	
 	@Override
 	public Tensor randi() {
@@ -289,20 +315,112 @@ public abstract class AbstractTensor implements Tensor {
 	
 	@Override
 	public Tensor arrange(double start, double end, double increment) {
-		int count = (int) (Math.abs(end - start)/increment);  
-		return constructor(new int[] {count})
-				.arrangei(start, end, increment);
+		return copy().arrange(start, end, increment);
 	}
 	
 	@Override
 	public Tensor arrangei(double start, double end, double di) {
-		Stream<Double> stream = Stream.iterate(start,  i -> i + di);
 		int count = (int) (Math.abs(end - start)/di);
 		if (count < this.count)
 			throw new ElementsCountInvalidException("Not enough elements to fill tensor. (Expected +"+this.count+" but got "+count);
-		return filli(stream.limit(count).iterator()::next);
+		Iterator<Double> iterator = Stream.iterate(start,  i -> i + di)
+				.limit(count)
+				.iterator(); 
+		return filli(iterator::next);
 	}
 	
+	@Override
+	public Tensor where(final Predicate<Double> condition) {
+		return copy().wherei(condition);
+	}
+
+	@Override
+	public Tensor wherei(final Predicate<Double> condition) {
+		return wherei(condition, 1, 0);
+	}
+
+	@Override
+	public Tensor where(final Predicate<Double> condition, double ifTrue, double ifFalse) {
+		return copy().wherei(condition, ifTrue, ifFalse);
+	}
+
+	@Override
+	public Tensor wherei(final Predicate<Double> condition, double ifTrue, double ifFalse) {
+		return elementWiseTransformi(v -> condition.test(v) ? ifTrue : ifFalse);
+	}
+
+	@Override
+	public Tensor and(final Tensor t) {
+		return copy().andi(t);
+	}
+
+	@Override
+	public Tensor andi(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> (double) (a.intValue() & b.intValue()), t);
+	}
+
+	@Override
+	public Tensor or(final Tensor t) {
+		return copy().ori(t);
+	}
+
+	@Override
+	public Tensor ori(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> (double) (a.intValue() | b.intValue()), t);
+	}
+
+	@Override
+	public Tensor not() {
+		return copy().noti();
+	}
+
+	@Override
+	public Tensor noti() {
+		return wherei(v -> v == 0);
+	}
+	
+	/* Comparisons */
+	
+	@Override
+	public Tensor lt(final Tensor t) {
+		return copy().lti(t);
+	}
+
+	@Override
+	public Tensor lti(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> a < b ? 1d : 0d, t);
+	}
+
+	@Override
+	public Tensor lte(final Tensor t) {
+		return copy().ltei(t);
+	}
+
+	@Override
+	public Tensor ltei(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> a <= b ? 1d : 0d, t);
+	}
+
+	@Override
+	public Tensor gt(final Tensor t) {
+		return copy().gti(t);
+	}
+
+	@Override
+	public Tensor gti(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> a > b ? 1d : 0d, t);
+	}
+
+	@Override
+	public Tensor gte(final Tensor t) {
+		return copy().gtei(t);
+	}
+
+	@Override
+	public Tensor gtei(final Tensor t) {
+		return elementWiseBiTransformi((a,b) -> a >= b ? 1d : 0d, t);
+	}
+
 	/* Iterative for each loops */
 	
 	@Override
@@ -335,7 +453,7 @@ public abstract class AbstractTensor implements Tensor {
 		return this;
 	}
 	
-	/* Recursive for loops (per dimension) */
+	/* Recursive for each loops (per dimension) */
 	
 	@Override
 	public <T> Tensor forEachDimension(IndexedIterationHandler<T> handler) {

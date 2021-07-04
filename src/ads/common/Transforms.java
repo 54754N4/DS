@@ -2,6 +2,10 @@ package ads.common;
 
 public interface Transforms {
 
+	static Double log(Double d, int base) {
+		return Math.log(d)/Math.log(base);
+	}
+	
 	static Double sec(Double x) {
 		return 1 / Math.cos(x);
 	}

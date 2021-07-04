@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import ads.common.Strings;
@@ -43,44 +44,35 @@ public interface Tensor {
 	Tensor broadcasti(BiFunction<Double, Double, Double> operation);
 
 	Tensor elementWiseTransformi(Function<Double, Double> map);
+	Tensor elementWiseIndexedTransformi(BiFunction<int[], Double, Double> map);
 	Tensor elementWiseBiTransformi(BiFunction<Double, Double, Double> map, Tensor t);
+	Tensor elementWiseIndexedBiTransformi(TriFunction<int[], Double, Double, Double> map, Tensor t);
 	
-	Tensor reshapei(int...indices);
-	Tensor arrangei(double start, double end, double increment);
-
 	/* All methods under this can be generated automatically using AbstractTensor */
 	
 	Tensor elementWiseTransform(Function<Double, Double> map);
+	Tensor elementWiseIndexedTransform(BiFunction<int[], Double, Double> map);
 	Tensor elementWiseBiTransform(BiFunction<Double, Double, Double> map, Tensor t);
+	Tensor elementWiseIndexedBiTransform(TriFunction<int[], Double, Double, Double> map, Tensor t);
 	
-	Tensor plus(Tensor t);
-	Tensor plusi(Tensor t);
-	Tensor timesi(double scalar);
-	Tensor times(double scalar);
-	Tensor minus(Tensor t);
-	Tensor minusi(Tensor t);
-	Tensor hadamard(Tensor t);
-	Tensor hadamardi(Tensor t);
-	Tensor divide(Tensor t);
-	Tensor dividei(Tensor t);
-	Tensor product(Tensor t);
-	
-	Tensor broadcast(BiFunction<Double, Double, Double> operation);
-	
-	Tensor arrange(double end);
-	Tensor arrangei(double end);
-	Tensor arrange(double start, double end);
-	Tensor arrangei(double start, double end);
-	Tensor arrange(double start, double end, double increment);
-	Tensor reshape(int...indices);
-	Tensor flatten();
-	Tensor flatteni();
-	Tensor fill(double value);
-	Tensor fill(Supplier<Double> generator);
-	Tensor filli(double value);
-	Tensor filli(Supplier<Double> generator);
-	Tensor randi();
+	Tensor plus(final Tensor t);
+	Tensor plusi(final Tensor t);
+	Tensor timesi(final double scalar);
+	Tensor times(final double scalar);
+	Tensor minus(final Tensor t);
+	Tensor minusi(final Tensor t);
+	Tensor hadamard(final Tensor t);
+	Tensor hadamardi(final Tensor t);
+	Tensor divide(final Tensor t);
+	Tensor dividei(final Tensor t);
+	Tensor outer(final Tensor t);
+	Tensor kronecker(final Tensor t);
+	Tensor mmul(final Tensor t);
+	Tensor broadcast(final BiFunction<Double, Double, Double> operation);
+
 	Tensor copy();
+	
+	/* Iterators */
 	
 	Iterator<int[]> coordinates();
 	
@@ -94,6 +86,49 @@ public interface Tensor {
 			IndexedIterationConsumer<T> pre, 
 			IndexedIterationHandler<T> handler, 
 			IndexedIterationConsumer<T> post);
+
+	/* Extra Transformations */
+	
+	Tensor flatten();
+	Tensor flatteni();
+	Tensor arrange(double end);
+	Tensor arrange(double start, double end);
+	Tensor arrangei(double end);
+	Tensor arrangei(double start, double end);
+	Tensor filli(double value);
+	Tensor filli(Supplier<Double> generator);
+	Tensor fill(double value);
+	Tensor fill(Supplier<Double> generator);
+	Tensor randi();
+	
+	Tensor reshapei(int...indices);
+	Tensor reshape(int...indices);
+	Tensor arrangei(double start, double end, double increment);
+	Tensor arrange(double start, double end, double increment);
+	
+	/* Logical transformations */
+	
+	Tensor where(final Predicate<Double> condition);
+	Tensor wherei(final Predicate<Double> condition);
+	Tensor where(final Predicate<Double> condition, double ifTrue, double ifFalse);
+	Tensor wherei(final Predicate<Double> condition, double ifTrue, double ifFalse);
+	Tensor and(final Tensor t);
+	Tensor andi(final Tensor t);
+	Tensor or(final Tensor t);
+	Tensor ori(final Tensor t);
+	Tensor not();
+	Tensor noti();
+	
+	/* Comparisons */
+	
+	Tensor lt(final Tensor t);
+	Tensor lti(final Tensor t);
+	Tensor lte(final Tensor t);
+	Tensor ltei(final Tensor t);
+	Tensor gt(final Tensor t);
+	Tensor gti(final Tensor t);
+	Tensor gte(final Tensor t);
+	Tensor gtei(final Tensor t);
 	
 	/**
 	 * Broadcast compatibility only depends on (starting from the end):
@@ -165,5 +200,10 @@ public interface Tensor {
 	@FunctionalInterface
 	public static interface IndexedIterationHandler<T> {
 		void handle(int[] coords, int axis, int count, boolean lastElementInBlock, T in);
+	}
+	
+	@FunctionalInterface
+	public static interface TriFunction<A, B, C, R> {
+		R apply(A a, B b, C c);
 	}
 }

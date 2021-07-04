@@ -30,7 +30,8 @@ public class SparseTensor extends AbstractTensor {
 		Coordinate c = searchByCoords(indices);
 		if (c == null) 
 			c = createCoords(indices);
-		memory.put(c, value);
+		if (value != 0)
+			memory.put(c, value);
 		return this;
 	}
 	
@@ -53,8 +54,20 @@ public class SparseTensor extends AbstractTensor {
 	}
 	
 	@Override
+	public Tensor elementWiseIndexedTransformi(BiFunction<int[], Double, Double> map) {
+		memory.forEach((coord, val) -> memory.put(coord, map.apply(coord.coords, val)));
+		return this;
+	}
+	
+	@Override
 	public Tensor elementWiseBiTransformi(BiFunction<Double, Double, Double> map, Tensor t) {
 		memory.forEach((coord, val) -> memory.put(coord, map.apply(val, t.get(coord.coords))));
+		return this;
+	}
+
+	@Override
+	public Tensor elementWiseIndexedBiTransformi(TriFunction<int[], Double, Double, Double> map, Tensor t) {
+		memory.forEach((coord, val) -> memory.put(coord, map.apply(coord.coords, val, t.get(coord.coords))));
 		return this;
 	}
 	

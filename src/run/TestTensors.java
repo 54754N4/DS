@@ -12,7 +12,7 @@ import ads.tensors.MemoryLayout;
 import ads.tensors.RowMajorTensor;
 
 @SuppressWarnings("unused")
-public class Test {
+public class TestTensors {
 	public static void main(String[] args) throws InterruptedException {
 //		testTensorsRank3();
 //		testSingleMemoryLayout();
@@ -22,7 +22,27 @@ public class Test {
 //		testTensorSimple();
 //		testReflection();
 //		testStriding();
-		testCoords();
+//		testCoords();
+//		testMmulKronecker();
+		testFactory();
+	}
+	
+	public static void testFactory() {
+//		System.out.println(Tensors.factory()
+//				.linspace(2, 3, 5));
+//		System.out.println(Tensors.factory()
+//				.logspace(1, 3, 5, false));
+		System.out.println(Tensors.factory()
+				.geomspace(1, 256, 9));
+	}
+	
+	public static void testMmulKronecker() {
+//		Tensor a = Tensors.rowMajor(new int[] {2,3}, 1,-4,7,-2,3,3),
+//			b = Tensors.rowMajor(new int[] {4,4}, 8,-9,-6,5,1,-3,-4,7,2,8,-8,-3,1,2,-5,-1);
+//		System.out.println(a.kronecker(b));
+		Tensor a = Tensors.rowMajor(new int[] {2,3}, 1,2,0,4,3,-1),
+			b = Tensors.rowMajor(new int[] {3,2}, 5,1,2,3,3,4);
+		System.out.println(a.mmul(b));
 	}
 	
 	public static void testTensorsRank3() {
@@ -74,7 +94,7 @@ public class Test {
 		double[] d1 = {1,2,3}, d2 = {4,5};
 		Tensor u = Tensors.rowMajor(s1, d1),
 			v = Tensors.rowMajor(s2, d2),
-			outer = u.product(v);
+			outer = u.outer(v);
 		System.out.println(u);
 		System.out.println(v);
 		System.out.println(Arrays.toString(outer.shape()));
@@ -86,7 +106,7 @@ public class Test {
 		double[] d1 = {1,2,3}, d2 = {4,5};
 		Tensor u = Tensors.colMajor(s1, d1),
 			v = Tensors.colMajor(s2, d2),
-			outer = u.product(v);
+			outer = u.outer(v);
 		System.out.println(u);
 		System.out.println(v);
 		System.out.println(Arrays.toString(outer.shape()));
@@ -94,10 +114,9 @@ public class Test {
 	}
 	
 	public static void testTensorSimple() {
-		Tensor t = Tensors.builder()
+		Tensor t = Tensors.factory()
 			.rowMajor()
-			.shape(new int[] {3,4,5})
-			.memory(
+			.create(new int[] {3,4,5},
 				1,2,3,4,5,
 				6,7,8,9,10,
 				11,12,13,14,15,
@@ -111,18 +130,16 @@ public class Test {
 				41,42,43,44,45,
 				46,47,48,49,50,
 				51,52,53,54,55,
-				56,57,58,59,60)
-			.build();
+				56,57,58,59,60);
 		System.out.println(t);
 		System.out.println(t.flatteni());
 		System.out.println(t.reshapei(10, 6));
 	}
 	
 	public static void testReflection() {
-		Tensor t = Tensors.builder()
+		Tensor t = Tensors.factory()
 				.rowMajor()
-				.shape(new int[] {3,4,5})
-				.memory(
+				.create(new int[] {3,4,5},
 					1,2,3,4,5,
 					6,7,8,9,10,
 					11,12,13,14,15,
@@ -136,8 +153,7 @@ public class Test {
 					41,42,43,44,45,
 					46,47,48,49,50,
 					51,52,53,54,55,
-					56,57,58,59,60)
-				.build();
+					56,57,58,59,60);
 		System.out.println(t.arrange(7,2, 1));
 	}
 	
