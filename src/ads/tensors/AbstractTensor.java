@@ -226,11 +226,6 @@ public abstract class AbstractTensor implements Tensor {
 		return result;
 	}
 	
-//	public Tensor directSum(final Tensor t) {
-//		
-//	}
-//	
-	
 	@Override
 	public Tensor randi() {
 		return elementWiseTransformi((value) -> RANDOM_GENERATOR.nextDouble());
@@ -430,25 +425,11 @@ public abstract class AbstractTensor implements Tensor {
 	
 	@Override
 	public Tensor forEachIndexed(BiConsumer<int[], Double> action) {
-		int[] coords = Numbers.zerosI(rank()),
-			shape = shape(),
-			stride = stride();
-		for (int count = 0, axis = 0, total = count(), rank = rank(), max = rank-1;; count++) {
+		Iterator<int[]> coordinates = coordinates();
+		int[] coords;
+		while (coordinates.hasNext()) {
+			coords = coordinates.next();
 			action.accept(coords, get(coords));
-			if (coords[max-axis]+1 != shape[axis])
-				coords[max-axis]++;
-			else {
-				// Find axis with unfulfilled dimension
-				while (axis+1 < rank && (count+1)%stride[axis+1] == 0) 
-					axis++;
-				if (count+1 == total)
-					break;
-				// Increment current biggest dimension
-				coords[max-axis]++;
-				// Reset previous dimension increments
-				while (axis != 0 && axis != rank) 
-					coords[max-(--axis)] = 0;
-			}
 		}
 		return this;
 	}

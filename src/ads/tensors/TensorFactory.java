@@ -2,6 +2,7 @@ package ads.tensors;
 
 import java.util.Iterator;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import ads.common.Transforms;
@@ -71,7 +72,7 @@ public class TensorFactory {
 	public Tensor identity(int...shape) {
 		return create(shape)
 			.elementWiseIndexedTransform((coords, val) -> 
-				Stream.of(coords).distinct().count() == 1 ? 1d : 0);	// if all coords are equal ? 1 : 0
+				IntStream.of(coords).distinct().count() == 1 ? 1d : 0);
 	}
 	
 	public Tensor arrange(double end, int...shape) {
