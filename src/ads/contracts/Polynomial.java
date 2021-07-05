@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 
 public interface Polynomial {
 	double getCoef(int exponent);
+	double[] getCoefs();
 	Polynomial setCoef(int exponent, double coef);
 	
 	int degree();
@@ -25,12 +26,12 @@ public interface Polynomial {
 	Polynomial plus(Polynomial p);
 	Polynomial minus(Polynomial p);
 	Polynomial times(Polynomial p);
-	Polynomial divide(Polynomial p);
+	Polynomial[] divide(Polynomial p);
 	Polynomial power(int exponent);
 	
 	Polynomial compose(Polynomial p);
 	
-	// TODO add derivative computation
+	Polynomial derivative();
 	
 	Polynomial copy();
 	

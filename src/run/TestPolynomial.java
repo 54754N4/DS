@@ -7,7 +7,9 @@ public class TestPolynomial {
 	public static void main(String[] args) {
 //		testCreation();
 //		testMultiplication();
-		testComposition();
+//		testComposition();
+//		testDivision();
+		testDerivative();
 	}
 	
 	public static void testCreation() {
@@ -42,5 +44,22 @@ public class TestPolynomial {
 		System.out.println(f);
 		System.out.println(g);
 		System.out.println(f.compose(g));
+	}
+	
+	public static void testDivision() {
+		Polynomial f = new ArrayPolynomial(-4,0,-2,1),
+				g = new ArrayPolynomial(-3, 1);
+		System.out.println(f);
+		System.out.println(g);
+		Polynomial[] division = f.divide(g);
+		System.out.println("Remainder " + division[0]);
+		System.out.println("Quotient " + division[1]);
+	}
+	
+	public static void testDerivative() {
+		Polynomial f = new ArrayPolynomial(true, -4, -1, 3);	// true means reversed
+		System.out.println(f);
+		System.out.println(f.derivative());
+		System.out.println(f.derivative().derivative());
 	}
 }
