@@ -44,24 +44,4 @@ public class LagrangeInterpolation extends BaseInterpolation<Polynomial> {
 	public Polynomial monome(int index) {
 		return create(-x(index), 1);	// x - xi
 	}
-	
-	public static void main(String[] args) {
-		double[][] data = {
-				{3, 1},
-				{4, 2},
-				{5, 4}
-		};	// gives: 0.5x^2-2.5x+4.0
-//		double[][] data1 = {
-//				{0.4, Math.log(0.4)},
-//				{0.5, Math.log(0.5)},
-//				{0.7, Math.log(0.7)},
-//				{0.8, Math.log(0.8)}
-//		};	// approximates ln using lagrange
-		LagrangeInterpolation l = new LagrangeInterpolation(data);
-//		System.out.println(l.points());
-//		System.out.println(l.x(0));
-//		System.out.println(l.y(0));
-		System.out.println(l.interpolate());
-//		System.out.println(l.interpolate().eval(0.60));	// prints -0.509976
-	}
 }
