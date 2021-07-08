@@ -114,5 +114,4 @@ public class ArrayPolynomial extends AbstractPolynomial {
 		p.forEach(this::minusi);
 		return this;
 	}
-	
 }

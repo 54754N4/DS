@@ -9,6 +9,14 @@ import ads.contracts.Polynomial;
 public abstract class AbstractPolynomial implements Polynomial {
 	
 	@Override
+	public double eval(double x) {
+		double y = 0;
+		for (int i=0; i<=degree(); i++)
+			y += getCoef(i) * Math.pow(x, i);
+		return y;
+	}
+	
+	@Override
 	public int degree() {
 		double[] coefs = getCoefs();
 		if (coefs.length == 1 && coefs[0] == 0)	// guard in case 0

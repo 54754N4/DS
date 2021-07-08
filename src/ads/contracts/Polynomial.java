@@ -6,6 +6,7 @@ public interface Polynomial {
 	double getCoef(int exponent);
 	double[] getCoefs();
 	Polynomial setCoef(int exponent, double coef);
+	double eval(double x);
 	
 	int degree();
 	
