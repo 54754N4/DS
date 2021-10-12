@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Predicate;
 
 public interface Utils {
 	
@@ -29,6 +30,10 @@ public interface Utils {
 			return new Bag<>(elements);
 		} 
 	}
+	
+	/**
+	 * Mathematics
+	 */
 	
 	static interface Maths {
 		static Set<Long> PRIMES_CACHE = new ConcurrentSkipListSet<>();
@@ -137,6 +142,10 @@ public interface Utils {
 			}
 		}
 	}
+
+	/**
+	 * Generic time conversion 
+	 */
 	
 	static interface Time {		
 		static enum Precision {
@@ -222,6 +231,107 @@ public interface Utils {
 		
 		static String fromMillis(long millis) {
 			return fromMillis(Precision.of(Precision.values()), millis);
+		}
+	}
+	
+	/**
+	 * Lists
+	 */
+	
+	static interface Lists {
+		
+		/**
+		 * Perfect splits are guaranteed only if 'into' is a multiple
+		 * of the count of elements in 'data'.
+		 * Otherwise, the next guarantee is that all the elements will be
+		 * appended to the last split-group, so that the total split-groups
+		 * returned by this splitter equals 'into'. 
+		 * Notes: 
+		 * - all elements except last will have 'stride' amount of elements
+		 * - last element's size is inside the interval [stride, 2*stride]
+		 * The last element's size is due to the way the stride is calculated: 
+		 * 		stride = length/into
+		 * And hence:
+		 * - if stride is the result of a perfect integer division, the splitter 
+		 * guarantees all elements will be the same size (e.g. stride amount
+		 * of elements)
+		 * - otherwise, it has a fractional excess inside the range ]0, 1[
+		 * multiplied by stride (and then truncated to int) number of extra
+		 * elements
+		 * @param <T> type of element inside the collection that we want to split
+		 */
+		static class Splitter<T> implements Iterator<List<T>> {
+			private final int stride, into;
+			private final List<T> data;
+			private int current, elements;
+			
+			private Splitter(int into, List<T> data) {
+				this.into = into;
+				this.data = data;
+				current = 0;
+				elements = 0;
+				stride = data.size()/into;
+			}
+
+			public boolean isPerfect() {
+				return data.size()%into == 0;
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return current < data.size() || elements < into;
+			}
+
+			@Override
+			public List<T> next() {
+				elements++;
+				Predicate<Integer> next = elements == into ?
+						i -> true :
+						i -> i < current+stride;
+				List<T> element = new ArrayList<>();
+				for (int i=current; next.test(i) && i < data.size(); i++)
+					element.add(data.get(i));
+				current += elements == into ? 
+						data.size() - current:
+						stride;
+				return element;
+			}
+			
+			public static <T> Splitter<T> split(int into, List<T> data) {
+				return new Splitter<>(into, data);
+			}
+		}
+	}
+	
+	static interface Arrays {
+		
+		static class Splitter<T> implements Iterator<T[]> {
+			private final Lists.Splitter<T> splitter;
+			
+			@SafeVarargs
+			private Splitter(int into, T...data) {
+				splitter = new Lists.Splitter<>(into, java.util.Arrays.asList(data));
+			}
+
+			public boolean isPerfect() {
+				return splitter.isPerfect();
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return splitter.hasNext();
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public T[] next() {
+				return (T[]) splitter.next().toArray();
+			}
+			
+			@SafeVarargs
+			public static <T> Splitter<T> split(int into, T...data) {
+				return new Splitter<>(into, data);
+			}
 		}
 	}
 }
