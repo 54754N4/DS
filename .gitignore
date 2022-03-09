@@ -1,3 +1,4 @@
 # Ignore gerenated bin folder
 bin/*
 .class
+/bin/
