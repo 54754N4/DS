@@ -1,8 +1,8 @@
 package ads.common;
 
 import ads.contracts.Tree;
-import ads.trees.FixedArityTree;
-import ads.trees.VariableArityTree;
+import ads.trees.generic.FixedArityTree;
+import ads.trees.generic.VariableArityTree;
 
 public interface Trees {
 	static <V> Tree<V> binary() {

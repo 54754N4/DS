@@ -1,4 +1,4 @@
-package ads.trees;
+package ads.trees.generic;
 
 import java.util.ArrayList;
 import java.util.List;
