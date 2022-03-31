@@ -24,4 +24,4 @@ The following are not part of any package since they're reused in other sub-pack
 
 ## TODO
 
-Finish desiging algrebras
+Finish desiging algebras
