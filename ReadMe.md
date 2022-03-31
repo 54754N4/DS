@@ -12,6 +12,7 @@ Here's a list of sub-packages and their uses:
 - `ads.linq` simulates C# LINQ streams in java
 - `ads.polynomial` 
 - `ads.sfc` space filling curves
+- `ads.solvers` linear system solver
 - `ads.tensors`
 - `ads.trees`
 
