@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import ads.contracts.Tree;
-import ads.trees.VariableArityTree;
+import ads.trees.generic.VariableArityTree;
 
 /** Base class of all mathematical operations.
  */
