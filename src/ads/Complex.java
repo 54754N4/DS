@@ -169,7 +169,7 @@ public class Complex {
 		return new Complex(nX,nY);
 	}
 	
-	public Complex similarity(double k, double theta, double oX, double oY) {
+	public Complex directSimilarity(double k, double theta, double oX, double oY) {
 		Complex a = new Complex(k*Math.cos(theta), k*Math.sin(theta)),		// a = k*[cos(t)+i*sin(t)]
 				w = new Complex(oX,oY), 									// origin w
 				b = a.times(-1).plus(1).times(w);							// b = (1-a)*w
@@ -179,11 +179,57 @@ public class Complex {
 	/**
 	 * Returns z' such as z' = a*z + b with (a,b) belonging to the complex space and a!=0
 	 */
-	public Complex similarity(Complex a, Complex b) {
+	public Complex directSimilarity(Complex a, Complex b) {
 		// with ratio k = |a|
 		// and angle theta = arg(a)
 		// and origin exists iff a!=1 with origin = b/(1-a) 
 		return times(a).plus(b);
+	}
+	
+	/**
+	 * Returns z^n = a^n * z + Sigma[c=0; n-1](a^c * b)
+	 * Using tex commands: z^{(n)}=a^nz+\sum_{c=0}^{n-1}a^cb
+	 */
+	public Complex composedDirectSimilarity(int n, Complex a, Complex b) {
+		Complex result = a.power(n).times(this);
+		for (int c=0; c<n-1; c++)
+			result = result.plus(a.power(c).times(b));
+		return result;
+	}
+	
+	/**
+	 * Returns z' = a * z.conjugate() + b
+	 */
+	public Complex indirectSimilarity(Complex a, Complex b) {
+		return conjugate().times(a).plus(b);
+	}
+	
+	/**
+	 * Using tex commands:
+	 * z^{(n)}=\begin{cases}
+		|a|^nz & \text{if n even}\\
+		a|a|^{n-1}\bar{z} & \text{if n odd}
+		\end{cases}
+		+\sum_{c=0}^{n-1}\begin{cases}
+		(|a|^2)^{floor(\frac{c}{2})}b & \text{if c even}\\
+		a(|a|^2)^{floor(\frac{c}{2})}\bar{b} & \text{if c odd}
+		\end{cases}
+	 */
+	public Complex composedIndirectSimilarity(int n, Complex a, Complex b) {
+		Complex result;
+		if (n%2 == 0)
+			result = times(Math.pow(a.modulus(), n));
+		else
+			result = conjugate().times(a).times(Math.pow(a.modulus(), n-1));
+		double a2 = Math.pow(a.modulus(), 2);
+		for (int c=0; c<n-1; c++) {
+			double coef = Math.pow(a2, c/2);
+			if (c%2 == 0)
+				result = result.plus(b.times(coef));
+			else
+				result = result.plus(b.conjugate().times(a).times(coef));
+		}
+		return result;
 	}
 	
 	/*	Conversions */
