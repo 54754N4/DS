@@ -176,9 +176,9 @@ public interface Algebras {
 			return addition().operation().apply(a, b);
 		}
 		
-		default Vector multiply(Scalar a, Scalar b) {
-			return multiplication().operation().apply(a, b);
-		}
+//		default Vector multiply(Scalar a, Scalar b) {
+//			return multiplication().operation().apply(a, b);
+//		}
 		
 		default boolean hasMultiplicativeDistributivity() {
 			return false;
@@ -318,15 +318,15 @@ public interface Algebras {
 		Semilattice<Scalar, Vector, Comparer> descending();
 	}
 	
-	static interface BoundedLattice<
-		Scalar,
-		Vector,
-		Comparer extends CommutativeMonoid<Scalar, Vector>
-	> extends Lattice<Scalar, Vector, Comparer> {
-		default Vector bottom() {
-			return ascending().comparator().
-		}
-	}
+//	static interface BoundedLattice<
+//		Scalar,
+//		Vector,
+//		Comparer extends CommutativeMonoid<Scalar, Vector>
+//	> extends Lattice<Scalar, Vector, Comparer> {
+//		default Vector bottom() {
+//			return ascending().comparator().
+//		}
+//	}
 	
 	/* Vector space */
 	
