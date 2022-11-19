@@ -5,6 +5,7 @@ Sample codes are in the `run` package.
 ## ADS
 
 Here's a list of sub-packages and their uses:
+- `ads.bool` boolean expression parser/interpreter and minimizer (e.g QMC)
 - `ads.crypto` merkle tree and hash list
 - `ads.diff` the differential function interpreter
 - `ads.funcs` function call wrapper (packs arguments too)
